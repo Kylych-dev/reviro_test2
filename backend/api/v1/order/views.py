@@ -1,37 +1,28 @@
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework import viewsets, status
-# from rest_framework.pagination import PageNumberPagination
+from rest_framework.pagination import PageNumberPagination
 
 
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
 
-from apps.product.models import Product
-from .serializers import ProductSerializer
-
-from rest_framework.pagination import PageNumberPagination
-
-class StandardResultsSetPagination(PageNumberPagination):
-    page_size = 100
-    page_size_query_param = 'page_size'
-    max_page_size = 1000
+from apps.order.models import Order
+from .serializers import OrderSerializer
 
 
-# todo: переделать  продукт везде перенсти и поменять поля
-class ProductModelViewSet(viewsets.ModelViewSet):
-    queryset = Product.objects.all()
-    serializer_class = ProductSerializer
-    # pagination_class = PageNumberPagination
-    # pagination_class = StandardResultsSetPagination
-    lookup_field = 'pk'
+
+class OrderModelViewSet(viewsets.ModelViewSet):
+    queryset = Order.objects.all()
+    serializer_class = OrderSerializer
+    pagination_class = PageNumberPagination
 
     @swagger_auto_schema(
         method="get",
-        operation_description="Получить список продуктов",
-        operation_summary="Получение списка продуктов",
-        operation_id="list_products",
-        tags=["Product"],
+        operation_description="Получить список заказов",
+        operation_summary="Получение списка заказов",
+        operation_id="list_order",
+        tags=["Order"],
         responses={
             200: openapi.Response(description="OK - Список успешно получен"),
             400: openapi.Response(description="Bad Request - Неверный запрос"),
@@ -46,12 +37,12 @@ class ProductModelViewSet(viewsets.ModelViewSet):
 
     @swagger_auto_schema(
         method="put",
-        operation_description="Обновление данных продукта",
-        operation_summary="Обновление данных продукта",
-        operation_id="update_products",
-        tags=["Product"],
+        operation_description="Обновление данных заказа",
+        operation_summary="Обновление данных заказа",
+        operation_id="update_order",
+        tags=["Order"],
         responses={
-            200: openapi.Response(description="OK - Объект успешно обновлен"),
+            200: openapi.Response(description="OK - Заказ успешно обновлен"),
             400: openapi.Response(
                 description="Bad Request - Неверный запрос или некорректные данные"
             ),
@@ -62,8 +53,8 @@ class ProductModelViewSet(viewsets.ModelViewSet):
     @action(detail=True, methods=["put"])
     def update(self, request, *args, **kwargs):
         try:
-            product = self.get_object()
-            serializer = ProductSerializer(product, data=request.data, partial=True)
+            instance = self.get_object()
+            serializer = OrderSerializer(instance, data=request.data, partial=True)
             if serializer.is_valid():
                 serializer.save()
                 return Response(
@@ -82,12 +73,12 @@ class ProductModelViewSet(viewsets.ModelViewSet):
 
     @swagger_auto_schema(
         method="post",
-        operation_description="Создание продуктов",
-        operation_summary="Создание продуктов",
-        operation_id="create_product",
-        tags=["Product"],
+        operation_description="Создание заказа",
+        operation_summary="Создание заказа",
+        operation_id="create_order",
+        tags=["Order"],
         responses={
-            201: openapi.Response(description="Created - Новый продукт успешно создан"),
+            201: openapi.Response(description="Created - Заказ успешно создан"),
             400: openapi.Response(description="Bad Request - Неверный запрос"),
             401: openapi.Response(description="Unauthorized - Неавторизованный запрос"),
             404: openapi.Response(description="Not Found - Ресурс не найден"),
@@ -106,22 +97,21 @@ class ProductModelViewSet(viewsets.ModelViewSet):
 
     @swagger_auto_schema(
         method="delete",
-        operation_description="Удаление продукта",
-        operation_summary="Удаление продукта",
-        operation_id="delete_product",
-        tags=["Product"],
+        operation_description="Удаление заказа",
+        operation_summary="Удаление заказа",
+        operation_id="delete_order",
+        tags=["Order"],
         responses={
-            204: openapi.Response(description="No Content - Продукт успешно удален"),
+            204: openapi.Response(description="No Content - Заказ успешно удален"),
             401: openapi.Response(description="Unauthorized - Неавторизованный запрос"),
-            404: openapi.Response(description="Not Found - Продукт не найден"),
+            404: openapi.Response(description="Not Found - Заказ не найден"),
         },
     )
     @action(detail=True, methods=["delete"])
     def delete(self, request, *args, **kwargs):
         try:
-            print(self.get_object(), '<---------------------------------------')
             instance = self.get_object()
             instance.delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
-        except Product.DoesNotExist:
-            return Response({"Сообщение": "Продукт не найден"}, status=status.HTTP_404_NOT_FOUND)
+        except Order.DoesNotExist:
+            return Response({"Сообщение": "Заказ не найден"}, status=status.HTTP_404_NOT_FOUND)

@@ -22,7 +22,7 @@ from .yasg import urlpatterns as doc_ts
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path("api/v1/", include("api.v1.route")),
+    path("api/v1/", include("api.route")),
     # path("", include("apps.pages.urls", namespace="pages")),
 ]
 urlpatterns += doc_ts

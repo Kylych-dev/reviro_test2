@@ -9,19 +9,18 @@ class EstablishmentSerializer(serializers.ModelSerializer):
         fields = (
             'name',
             'description',
-            'locations',
-            'opening_hours',
-            'requirements'
+            'phone_number',
+            'avatar',
+            'partner'
         )
 
 
 
 '''
-    id 
-    name 
+    name
+    location
     description
-    locations 
-    opening_hours
-    requirements
-
+    phone_number
+    avatar
+    partner
 '''

@@ -1,13 +1,13 @@
 from django.db import models
-import uuid
+from ..accounts.models import Partner
 
 class Establishment(models.Model):
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False, verbose_name="ID")
     name = models.CharField(max_length=100, verbose_name="Name")
+    location = models.CharField(max_length=100, verbose_name="Location")
     description = models.TextField(verbose_name="Description")
-    locations = models.CharField(max_length=255, verbose_name="Locations")
-    opening_hours = models.CharField(max_length=100, verbose_name="Opening Hours")
-    requirements = models.TextField(verbose_name="Requirements")
+    phone_number = models.CharField(max_length=15, verbose_name="Phone Number")
+    avatar = models.ImageField(upload_to='avatars', blank=True, verbose_name="Avatar")
+    partner = models.ForeignKey(Partner, on_delete=models.CASCADE, verbose_name="Partner", related_name='establishments')
 
     class Meta:
         verbose_name = "Establishment"
@@ -15,5 +15,3 @@ class Establishment(models.Model):
 
     def __str__(self):
         return self.name
-    
-    

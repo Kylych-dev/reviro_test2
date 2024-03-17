@@ -3,26 +3,24 @@ from rest_framework.response import Response
 from rest_framework import viewsets, status
 from rest_framework.pagination import PageNumberPagination
 
-
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
 
-from apps.establishment.models import Establishment
-from .serializers import EstablishmentSerializer
+from apps.beverage.models import Beverage
+from .serializers import BeverageSerializer
 
 
-
-class EstablishmentModelViewSet(viewsets.ModelViewSet):
-    queryset = Establishment.objects.all()
-    serializer_class = EstablishmentSerializer
+class BeverageModelViewSet(viewsets.ModelViewSet):
+    queryset = Beverage.objects.all()
+    serializer_class = BeverageSerializer
     pagination_class = PageNumberPagination
 
     @swagger_auto_schema(
         method="get",
-        operation_description="Получить список учреждений",
-        operation_summary="Получение списка учреждений",
-        operation_id="list_establishment",
-        tags=["Establishment"],
+        operation_description="Получить список напитков",
+        operation_summary="Получение списка напитков",
+        operation_id="list_beverage",
+        tags=["Beverage"],
         responses={
             200: openapi.Response(description="OK - Список успешно получен"),
             400: openapi.Response(description="Bad Request - Неверный запрос"),
@@ -37,12 +35,12 @@ class EstablishmentModelViewSet(viewsets.ModelViewSet):
 
     @swagger_auto_schema(
         method="put",
-        operation_description="Обновление данных учреждений",
-        operation_summary="Обновление данных учреждений",
-        operation_id="update_establishment",
-        tags=["Establishment"],
+        operation_description="Обновление данных напитка",
+        operation_summary="Обновление данных напитка",
+        operation_id="update_beverage",
+        tags=["Beverage"],
         responses={
-            200: openapi.Response(description="OK - Учреждение успешно обновлен"),
+            200: openapi.Response(description="OK - Напиток успешно обновлен"),
             400: openapi.Response(
                 description="Bad Request - Неверный запрос или некорректные данные"
             ),
@@ -53,8 +51,8 @@ class EstablishmentModelViewSet(viewsets.ModelViewSet):
     @action(detail=True, methods=["put"])
     def update(self, request, *args, **kwargs):
         try:
-            establishment = self.get_object()
-            serializer = EstablishmentSerializer(establishment, data=request.data, partial=True)
+            beverage = self.get_object()
+            serializer = BeverageSerializer(beverage, data=request.data, partial=True)
             if serializer.is_valid():
                 serializer.save()
                 return Response(
@@ -73,12 +71,12 @@ class EstablishmentModelViewSet(viewsets.ModelViewSet):
 
     @swagger_auto_schema(
         method="post",
-        operation_description="Создание учреждений",
-        operation_summary="Создание учреждений",
-        operation_id="create_establishment",
-        tags=["Establishment"],
+        operation_description="Создание напитка",
+        operation_summary="Создание напитка",
+        operation_id="create_beverage",
+        tags=["Beverage"],
         responses={
-            201: openapi.Response(description="Created - Новый учреждение успешно созданo"),
+            201: openapi.Response(description="Created - Напиток успешно создан"),
             400: openapi.Response(description="Bad Request - Неверный запрос"),
             401: openapi.Response(description="Unauthorized - Неавторизованный запрос"),
             404: openapi.Response(description="Not Found - Ресурс не найден"),
@@ -97,14 +95,14 @@ class EstablishmentModelViewSet(viewsets.ModelViewSet):
 
     @swagger_auto_schema(
         method="delete",
-        operation_description="Удаление учреждения",
-        operation_summary="Удаление учреждения",
-        operation_id="delete_establishment",
-        tags=["Establishment"],
+        operation_description="Удаление напитка",
+        operation_summary="Удаление напитка",
+        operation_id="delete_beverage",
+        tags=["Beverage"],
         responses={
-            204: openapi.Response(description="No Content - Учреждение успешно удален"),
+            204: openapi.Response(description="No Content - Напиток успешно удален"),
             401: openapi.Response(description="Unauthorized - Неавторизованный запрос"),
-            404: openapi.Response(description="Not Found - Учреждение не найден"),
+            404: openapi.Response(description="Not Found - напиток не найден"),
         },
     )
     @action(detail=True, methods=["delete"])
@@ -113,5 +111,5 @@ class EstablishmentModelViewSet(viewsets.ModelViewSet):
             instance = self.get_object()
             instance.delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
-        except Establishment.DoesNotExist:
-            return Response({"Сообщение": "Учреждение не найден"}, status=status.HTTP_404_NOT_FOUND)
+        except Beverage.DoesNotExist:
+            return Response({"Сообщение": "Напиток не найден"}, status=status.HTTP_404_NOT_FOUND)
