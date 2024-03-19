@@ -15,9 +15,8 @@ router = DefaultRouter(trailing_slash=False)
 urlpatterns = router.urls
 
 urlpatterns.extend(
-    [
-
-        # auth
+    [   
+        # Auth
         path("register/", RegisterView.as_view({"post": "register"}), name="register"),
         path("login/", UserAuthenticationView.as_view({"post": "login"}), name="login"),
         path("logout/", UserAuthenticationView.as_view({"post": "logout"}), name="logout"),
