@@ -8,7 +8,8 @@ from api.v1.order.views import OrderModelViewSet
 from api.v1.qr_code.views import QRCodeModelViewSet 
 
 
-from api.auth.views import RegisterView, UserAuthenticationView
+# from api.auth.views import RegisterView, UserAuthenticationView
+from api.auth.views import PartnerRegistrationView, RegularUserRegistrationView
 
 router = DefaultRouter(trailing_slash=False)
 
@@ -17,9 +18,18 @@ urlpatterns = router.urls
 urlpatterns.extend(
     [   
         # Auth
-        path("register/", RegisterView.as_view({"post": "register"}), name="register"),
-        path("login/", UserAuthenticationView.as_view({"post": "login"}), name="login"),
-        path("logout/", UserAuthenticationView.as_view({"post": "logout"}), name="logout"),
+        path('register/partner/', PartnerRegistrationView.as_view(), name='partner-registration'),
+        path('register/user/', RegularUserRegistrationView.as_view(), name='user-registration'),
+
+        # path("register/", RegisterView.as_view({"post": "register"}), name="register"),
+        # path("login/", UserAuthenticationView.as_view({"post": "login"}), name="login"),
+        # path("logout/", UserAuthenticationView.as_view({"post": "logout"}), name="logout"),
+
+        # user
+        # path("users/", CustomUserViewSet.as_view({"get": "list"}), name="user-list"),
+        # path("users/profile/", CustomUserViewSet.as_view({"get": "user_profile"}), name="user-profile"),
+        # path("users/<slug:slug>/", CustomUserViewSet.as_view({"get": "user_detail"}), name="user-detail"),
+        # path("users/<slug:slug>/", CustomUserViewSet.as_view({"put": "update_detail"}), name="update-detail"),
 
         # Beverage
         path("beverage/", BeverageModelViewSet.as_view({"get": "list"}), name="beverage-list"),
@@ -46,11 +56,7 @@ urlpatterns.extend(
         path("qr_code/delete/<uuid:pk>/",QRCodeModelViewSet.as_view({"delete": "delete"}), name="qr_code-delete"),
 
         
-        # user
-        # path("users/", CustomUserViewSet.as_view({"get": "list"}), name="user-list"),
-        # path("users/profile/", CustomUserViewSet.as_view({"get": "user_profile"}), name="user-profile"),
-        # path("users/<slug:slug>/", CustomUserViewSet.as_view({"get": "user_detail"}), name="user-detail"),
-        # path("users/<slug:slug>/", CustomUserViewSet.as_view({"put": "update_detail"}), name="update-detail"),
+        
 
         # product
         # path("product/", ProductModelViewSet.as_view({"get": "list"}), name="product-list"),
