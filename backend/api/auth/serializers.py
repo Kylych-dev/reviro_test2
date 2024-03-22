@@ -1,24 +1,65 @@
 from django.contrib.auth.password_validation import validate_password
 from rest_framework import serializers
-from apps.accounts.models import CustomUser
+from apps.accounts.models import (
+    CustomUser, 
+    Partner, 
+    RegularUser
+)
 
 
 class CustomUserSerializer(serializers.ModelSerializer):
-    # password = serializers.CharField(
-    #     write_only=True, required=True, validators=[validate_password]
-    # )
-    password = serializers.CharField(write_only=True, required=True)
-    email = serializers.CharField(required=True)
-
-
     class Meta:
         model = CustomUser
-        fields = (
-            "password",
-            "email",
-        )
-        # extra_kwargs = {
-        #     "password": {"write_only": True},
-        #     "first_name": {"required": True},
-        #     "last_name": {"required": True},
-        # }
+        fields = ['email', 'role', 'password']
+        extra_kwargs = {'password': {'write_only': True}}
+
+    def create(self, validated_data):
+        user = CustomUser.objects.create_user(**validated_data)
+        return user
+    
+
+class PartnerSerializer(serializers.ModelSerializer):
+    user = CustomUserSerializer()
+
+    class Meta:
+        model = Partner
+        fields = '__all__'
+
+    def create(self, validated_data):
+        print('---->', validated_data)
+        user_data = validated_data.pop('user')
+        role = user_data.pop('role')
+        user = CustomUser.objects.create_user(role=role, **user_data)
+        student = Partner.objects.create(user=user, **validated_data)
+        return student
+
+
+class RegularUserSerializer(serializers.ModelSerializer):
+    user = CustomUserSerializer()
+
+    class Meta:
+        model = RegularUser
+        fields = '__all__'
+
+    def create(self, validated_data):
+        print('---->', validated_data)
+        user_data = validated_data.pop('user')
+        role = user_data.pop('role')
+        user = CustomUser.objects.create_user(role=role, **user_data)
+        student = RegularUser.objects.create(user=user, **validated_data)
+        return student
+
+
+
+
+
+
+
+
+
+'''
+
+update 
+
+
+'''

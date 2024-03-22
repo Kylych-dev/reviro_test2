@@ -1,33 +1,194 @@
-from django.shortcuts import get_object_or_404
 from rest_framework_simplejwt.tokens import AccessToken, RefreshToken
 from rest_framework_simplejwt.exceptions import AuthenticationFailed, TokenError
+from rest_framework_simplejwt.settings import api_settings
+from rest_framework.permissions import AllowAny
+from rest_framework.views import APIView
 from rest_framework import status, viewsets
 from rest_framework import permissions
 from rest_framework.response import Response
+from datetime import datetime
+from apps.accounts.models import (
+    CustomUser, 
+    Partner, 
+    RegularUser
+    )
 
-from drf_yasg.utils import swagger_auto_schema
-from drf_yasg import openapi
+from .serializers import (
+    CustomUserSerializer, 
+    PartnerSerializer, 
+    RegularUserSerializer
+    )
 
-from apps.accounts.models import CustomUser
-from .serializers import CustomUserSerializer
-from core.utils import normalize_email
 
+class UserRegistrationView(APIView):
+    permission_classes = [AllowAny]
+    def post(self, request):
+        serializer = CustomUserSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(
+                serializer.data, 
+                status=status.HTTP_201_CREATED
+                )
+        return Response(
+            serializer.errors, 
+            status=status.HTTP_400_BAD_REQUEST
+            )
+
+
+class RegularUserRegistrationView(APIView):
+    permission_classes = [AllowAny]
+    def post(self, request):
+        serializer = RegularUserSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(
+                serializer.data, 
+                status=status.HTTP_201_CREATED
+                )
+        return Response(
+            serializer.errors, 
+            status=status.HTTP_400_BAD_REQUEST
+            )
+
+
+class PartnerRegistrationView(APIView):
+    permission_classes = [AllowAny]
+    def post(self, request):
+        serializer = PartnerSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(
+                serializer.data, 
+                status=status.HTTP_201_CREATED
+                )
+        return Response(
+            serializer.errors, 
+            status=status.HTTP_400_BAD_REQUEST
+            )
+
+
+class UserAuthenticationView(viewsets.ViewSet):
+    permission_classes = (permissions.AllowAny,)
+    def login(self, request):
+        email = request.data.get('email')
+        password = request.data.get('password')
+        try:                                                    # Провеорка в БД пользователя 
+            custom_user = CustomUser.objects.get(email=email)
+            regular_user = custom_user.role
+        except RegularUser.DoesNotExist:
+            raise AuthenticationFailed("Такого пользователя не существует")
+
+        if custom_user is None or regular_user is None:
+            raise AuthenticationFailed("Такого пользователя не существует")
+
+        if not custom_user.check_password(password):
+            raise AuthenticationFailed("Не правильный пароль")
+
+        access_token = AccessToken.for_user(custom_user)
+        refresh_token = RefreshToken.for_user(custom_user)
+
+        # ___________________________________________________________
+        # Допольнительная ифнормация о токене
+        access_token_lifetime = api_settings.ACCESS_TOKEN_LIFETIME
+        refresh_token_lifetime = api_settings.REFRESH_TOKEN_LIFETIME
+        current_datetime = datetime.now()
+        access_token_expiration = current_datetime + access_token_lifetime
+        refresh_token_expiration = current_datetime + refresh_token_lifetime
+        # ___________________________________________________________
+
+        return Response(
+            data={
+                "access_token": str(access_token),
+                "access_token_expires": access_token_expiration.strftime("%Y-%m-%d %H:%M:%S"),
+
+                "refresh_token": str(refresh_token),
+                "refresh_token_expires": refresh_token_expiration.strftime("%Y-%m-%d %H:%M:%S"),
+                
+                "token_type": "access",
+                "status": "success"
+            },
+            status=status.HTTP_200_OK,
+        )
+
+    def logout(self, request):
+        try:
+            if "refresh_token" in request.data:
+                refresh_token = request.data["refresh_token"]
+                if refresh_token:
+                    token = RefreshToken(refresh_token)
+                    token.blacklist()
+                return Response("Вы вышли из учетной записи", status=status.HTTP_200_OK)
+            else:
+                return Response(
+                    "Отсутствует refresh_token", status=status.HTTP_400_BAD_REQUEST
+                )
+        except TokenError:
+            raise AuthenticationFailed("Не правильный токен")
+
+
+
+
+
+'''
+register partner
+
+{
+    "user": {
+        "email": "user@mail.ru",
+        "role": "partner",
+        "password": 1
+    },
+    "establishment_name": "ramstor",
+    "location": "bishkek",
+    "description": "trade center",
+    "phone_number": 12345
+}
+
+
+
+'''
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+'''
 
 class RegisterView(viewsets.ViewSet):
     permission_classes = (permissions.AllowAny,)
     serializer_class = CustomUserSerializer
 
-    @swagger_auto_schema(
-        request_body=CustomUserSerializer,
-        operation_description="Создание нового пользователя",
-        operation_summary="Создание нового пользователя",
-        operation_id="register_user",
-        tags=["Authentication"],
-        responses={
-            201: openapi.Response(description="OK - Регистрация прошла успешно."),
-            400: openapi.Response(description="Bad Request - Неверный запрос."),
-        },
-    )
     def register(self, request, *args, **kwargs):
         serializer = CustomUserSerializer(data=request.data)
         if serializer.is_valid(raise_exception=True):
@@ -59,20 +220,6 @@ class RegisterView(viewsets.ViewSet):
 class UserAuthenticationView(viewsets.ViewSet):
     permission_classes = (permissions.AllowAny,)
 
-    @swagger_auto_schema(
-        request_body=CustomUserSerializer,
-        operation_description="Авторизация пользователя для получения токена.",
-        operation_summary="Авторизация пользователя для получения токена",
-        operation_id="login_user",
-        tags=["Authentication"],
-        responses={
-            200: openapi.Response(
-                description="OK - Авторизация пользователя прошла успешно."
-            ),
-            400: openapi.Response(description="Bad Request - Неверный запрос."),
-            404: openapi.Response(description="Not Found - Пользователь не найден"),
-        },
-    )
     def login(self, request):
         print(request.data, '/*/*/*/*/*/*')
         phone_number = request.data["email"]
@@ -106,19 +253,7 @@ class UserAuthenticationView(viewsets.ViewSet):
             status=status.HTTP_200_OK,
         )
 
-    @swagger_auto_schema(
-        request_body=CustomUserSerializer,
-        operation_description="Выход для удаления токена.",
-        operation_summary="Выход для удаления токена",
-        operation_id="logout_user",
-        tags=["Authentication"],
-        responses={
-            201: openapi.Response(
-                description="OK - Выход пользователя прошла успешно."
-            ),
-            400: openapi.Response(description="Bad Request - Неверный запрос."),
-        },
-    )
+
     def logout(self, request):
         try:
             if "refresh_token" in request.data:
@@ -135,4 +270,4 @@ class UserAuthenticationView(viewsets.ViewSet):
             raise AuthenticationFailed("Не правильный токен")
         
 
-        
+        '''

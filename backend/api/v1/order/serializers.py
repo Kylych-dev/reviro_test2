@@ -19,5 +19,4 @@ class OrderSerializer(serializers.ModelSerializer):
     establishment
     beverage
     order_date 
-
 '''
