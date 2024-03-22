@@ -68,7 +68,7 @@ class PartnerRegistrationView(APIView):
             )
 
 
-class RegularUserAuthenticationView(viewsets.ViewSet):
+class UserAuthenticationView(viewsets.ViewSet):
     permission_classes = (permissions.AllowAny,)
     def login(self, request):
         email = request.data.get('email')
@@ -127,6 +127,27 @@ class RegularUserAuthenticationView(viewsets.ViewSet):
             raise AuthenticationFailed("Не правильный токен")
 
 
+
+
+
+'''
+register partner
+
+{
+    "user": {
+        "email": "user@mail.ru",
+        "role": "partner",
+        "password": 1
+    },
+    "establishment_name": "ramstor",
+    "location": "bishkek",
+    "description": "trade center",
+    "phone_number": 12345
+}
+
+
+
+'''
 
 
 

@@ -1,15 +1,18 @@
 from django.urls import path
 from rest_framework.routers import DefaultRouter
 
-# from api.v1.product.views import ProductModelViewSet
 from api.v1.establishment.views import EstablishmentModelViewSet
+from api.v1.accounts.views import RegularUserUpdateView, PartnerUpdateView
 from api.v1.beverage.views import BeverageModelViewSet
 from api.v1.order.views import OrderModelViewSet
 from api.v1.qr_code.views import QRCodeModelViewSet 
 
-
-# from api.auth.views import RegisterView, UserAuthenticationView
-from api.auth.views import PartnerRegistrationView, RegularUserRegistrationView
+from api.auth.views import (
+    PartnerRegistrationView, 
+    RegularUserRegistrationView, 
+    UserAuthenticationView, 
+    UserRegistrationView
+    )
 
 router = DefaultRouter(trailing_slash=False)
 
@@ -19,17 +22,22 @@ urlpatterns.extend(
     [   
         # Auth
         path('register/partner/', PartnerRegistrationView.as_view(), name='partner-registration'),
+        path('register/admin/', UserRegistrationView.as_view(), name='admin_registration'),
         path('register/user/', RegularUserRegistrationView.as_view(), name='user-registration'),
 
-        # path("register/", RegisterView.as_view({"post": "register"}), name="register"),
-        # path("login/", UserAuthenticationView.as_view({"post": "login"}), name="login"),
-        # path("logout/", UserAuthenticationView.as_view({"post": "logout"}), name="logout"),
+        path('login/', UserAuthenticationView.as_view({"post": "login"}), name='user-login'),
+        path('logout/', UserAuthenticationView.as_view({"post": "logout"}), name='user-logout'),
 
         # user
         # path("users/", CustomUserViewSet.as_view({"get": "list"}), name="user-list"),
         # path("users/profile/", CustomUserViewSet.as_view({"get": "user_profile"}), name="user-profile"),
         # path("users/<slug:slug>/", CustomUserViewSet.as_view({"get": "user_detail"}), name="user-detail"),
-        # path("users/<slug:slug>/", CustomUserViewSet.as_view({"put": "update_detail"}), name="update-detail"),
+        # path("users/<slug:slug>/", RegularUserUpdateView.as_view({"put": "update_detail"}), name="update-detail"),
+        path("users_update/<int:pk>/", RegularUserUpdateView.as_view(), name="update-detail"),
+        path("partner_update/<int:pk>/", PartnerUpdateView.as_view(), name="update-detail"),
+
+        
+
 
         # Beverage
         path("beverage/", BeverageModelViewSet.as_view({"get": "list"}), name="beverage-list"),
@@ -56,8 +64,7 @@ urlpatterns.extend(
         path("qr_code/delete/<uuid:pk>/",QRCodeModelViewSet.as_view({"delete": "delete"}), name="qr_code-delete"),
 
         
-        
-
+    
         # product
         # path("product/", ProductModelViewSet.as_view({"get": "list"}), name="product-list"),
         # path("product/create/", ProductModelViewSet.as_view({"post": "create"}), name="product-create"),

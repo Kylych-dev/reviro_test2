@@ -7,7 +7,6 @@ from apps.accounts.models import (
 )
 
 
-
 class CustomUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = CustomUser
@@ -50,3 +49,17 @@ class RegularUserSerializer(serializers.ModelSerializer):
         student = RegularUser.objects.create(user=user, **validated_data)
         return student
 
+
+
+
+
+
+
+
+
+'''
+
+update 
+
+
+'''
