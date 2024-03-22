@@ -1,12 +1,12 @@
-from django.shortcuts import get_object_or_404
 from rest_framework_simplejwt.tokens import AccessToken, RefreshToken
 from rest_framework_simplejwt.exceptions import AuthenticationFailed, TokenError
+from rest_framework_simplejwt.settings import api_settings
 from rest_framework.permissions import AllowAny
 from rest_framework.views import APIView
 from rest_framework import status, viewsets
 from rest_framework import permissions
 from rest_framework.response import Response
-
+from datetime import datetime
 from apps.accounts.models import (
     CustomUser, 
     Partner, 
@@ -68,24 +68,14 @@ class PartnerRegistrationView(APIView):
             )
 
 
-
-
-
-
 class RegularUserAuthenticationView(viewsets.ViewSet):
     permission_classes = (permissions.AllowAny,)
     def login(self, request):
-        print(request, '*****************')
-        print('\n')
-        print(request.data, '*****************')
-
         email = request.data.get('email')
         password = request.data.get('password')
-
-        try:
+        try:                                                    # Провеорка в БД пользователя 
             custom_user = CustomUser.objects.get(email=email)
-            regular_user = custom_user.regularuser
-            print(custom_user.role, '<<<<<<<-------------------------')
+            regular_user = custom_user.role
         except RegularUser.DoesNotExist:
             raise AuthenticationFailed("Такого пользователя не существует")
 
@@ -98,10 +88,25 @@ class RegularUserAuthenticationView(viewsets.ViewSet):
         access_token = AccessToken.for_user(custom_user)
         refresh_token = RefreshToken.for_user(custom_user)
 
+        # ___________________________________________________________
+        # Допольнительная ифнормация о токене
+        access_token_lifetime = api_settings.ACCESS_TOKEN_LIFETIME
+        refresh_token_lifetime = api_settings.REFRESH_TOKEN_LIFETIME
+        current_datetime = datetime.now()
+        access_token_expiration = current_datetime + access_token_lifetime
+        refresh_token_expiration = current_datetime + refresh_token_lifetime
+        # ___________________________________________________________
+
         return Response(
             data={
                 "access_token": str(access_token),
+                "access_token_expires": access_token_expiration.strftime("%Y-%m-%d %H:%M:%S"),
+
                 "refresh_token": str(refresh_token),
+                "refresh_token_expires": refresh_token_expiration.strftime("%Y-%m-%d %H:%M:%S"),
+                
+                "token_type": "access",
+                "status": "success"
             },
             status=status.HTTP_200_OK,
         )
@@ -120,8 +125,6 @@ class RegularUserAuthenticationView(viewsets.ViewSet):
                 )
         except TokenError:
             raise AuthenticationFailed("Не правильный токен")
-
-
 
 
 
