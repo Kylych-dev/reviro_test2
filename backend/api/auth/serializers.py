@@ -20,7 +20,6 @@ class CustomUserSerializer(serializers.ModelSerializer):
     
 
 class PartnerSerializer(serializers.ModelSerializer):
-    # user = CustomUserSerializer(read_only=True)
     user = CustomUserSerializer()
 
     class Meta:
