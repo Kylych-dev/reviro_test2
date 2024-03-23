@@ -1,5 +1,10 @@
 from rest_framework import serializers
-from apps.accounts.models import RegularUser, CustomUser, Partner
+from apps.accounts.models import (
+    RegularUser, 
+    CustomUser, 
+    Partner, 
+    ChatMessage
+    )
 
 
 
@@ -48,6 +53,24 @@ class PartnerSerializer(serializers.ModelSerializer):
 
 
 
+class ChatMessageSerializer(serializers.ModelSerializer):
+    text = serializers.CharField(required=True)
+    recipient_email = serializers.EmailField(required=True)
+
+    class Meta:
+        model = ChatMessage
+        fields = [
+            # 'sender_email', 
+            'recipient_email', 
+            'text', 
+            'timestamp'
+            ]
+
+    def get_sender_email(self, obj):
+        return obj.sender.email
+
+    def get_recipient_email(self, obj):
+        return obj.recipient.email
 
 
 

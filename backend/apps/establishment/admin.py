@@ -6,3 +6,8 @@ from .models import Establishment
 #     list_display = ('id', 'name', 'description', 'locations', 'opening_hours', 'requirements')
 #     search_fields = ('name',)
 #     list_filter = ('locations',)
+
+
+
+admin.site.register(Establishment)
+

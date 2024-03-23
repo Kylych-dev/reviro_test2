@@ -1,6 +1,6 @@
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from rest_framework import viewsets, status
+from rest_framework import viewsets, status, permissions
 from rest_framework.pagination import PageNumberPagination
 
 
@@ -10,12 +10,14 @@ from drf_yasg import openapi
 from apps.order.models import Order
 from .serializers import OrderSerializer
 
-
+from backend.api.utils.permissions import IsPartnerOrReadOnly
 
 class OrderModelViewSet(viewsets.ModelViewSet):
     queryset = Order.objects.all()
     serializer_class = OrderSerializer
     pagination_class = PageNumberPagination
+    permission_classes = [permissions.IsAuthenticated,]
+
 
     @swagger_auto_schema(
         method="get",

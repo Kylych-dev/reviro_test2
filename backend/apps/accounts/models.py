@@ -1,7 +1,9 @@
 from django.db import models
 from django.contrib.auth.base_user import AbstractBaseUser
 from django.contrib.auth.models import PermissionsMixin
+from django.core.validators import MaxLengthValidator
 from django.utils.translation import gettext_lazy as _
+from django.utils import timezone
 
 from .manager import CustomUserManager
 
@@ -75,13 +77,20 @@ class Partner(models.Model):
 
     def __str__(self):
         return self.establishment_name
-    
 
 
+class ChatMessage(models.Model):
+    sender = models.ForeignKey(CustomUser, related_name='sent_messages', on_delete=models.CASCADE)
+    receiver = models.ForeignKey(CustomUser, related_name='received_messages', on_delete=models.CASCADE)
+    text = models.TextField(verbose_name="Text", validators=[MaxLengthValidator(500)])
+    timestamp = models.DateTimeField(default=timezone.now)
+    is_read = models.BooleanField(default=False)
 
+    class Meta:
+        ordering = ['-timestamp']
 
-
-
+    def __str__(self):
+           return self.text
 
 
 '''
@@ -119,6 +128,13 @@ User login
     "password": 1
 }
 
+
+{
+    "email": "user@mail.ru",
+    "password": 1,
+    "refresh_token": "eyJhbGciOiJIUzKfTE2_FzzxKFA17mWv6bAY4bfrL_jc"
+}
+
 http://127.0.0.1:3000/api/v1/login/
 
 http://127.0.0.1:3000/api/v1/login/?token= 
@@ -130,7 +146,7 @@ http://127.0.0.1:3000/api/v1/login/?token=
 "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzExMTAyMDM3LCJpYXQiOjE3MTEwOTg0MzcsImp0aSI6IjlkYzVkNjhjODc5ZTQ4OGM4ZWYxY2MzNDJkMzM5NjdiIiwidXNlcl9pZCI6Mn0.0KV6fAavBw-79iy2FA1TuMV20J8yU9Nk7t5rQmxTVfk"
 
 
-
+http://127.0.0.1:3000/api/v1/logout/?refresh_token=<ваш_refresh_токен>
 
 
 
