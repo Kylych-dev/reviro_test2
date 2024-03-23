@@ -1,10 +1,10 @@
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from rest_framework import viewsets, status
-from rest_framework.pagination import PageNumberPagination
+from rest_framework import viewsets, status, permissions
 
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
+
 
 from api.v1.qr_code.serializers import QRCodeSerializer
 from apps.qr_code.models import QRCode
@@ -13,7 +13,9 @@ from apps.qr_code.models import QRCode
 class QRCodeModelViewSet(viewsets.ModelViewSet):
     queryset = QRCode.objects.all()
     serializer_class = QRCodeSerializer
-    pagination_class = PageNumberPagination
+    permission_classes = [permissions.IsAdminUser,]
+    
+
 
     @swagger_auto_schema(
         method="get",

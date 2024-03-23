@@ -1,12 +1,14 @@
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from rest_framework import viewsets, status
+from rest_framework import viewsets, status, permissions
 from rest_framework.pagination import PageNumberPagination
+
 
 
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
 
+from backend.api.utils.permissions import IsPartnerOrReadOnly
 from apps.establishment.models import Establishment
 from .serializers import EstablishmentSerializer
 
@@ -15,7 +17,7 @@ from .serializers import EstablishmentSerializer
 class EstablishmentModelViewSet(viewsets.ModelViewSet):
     queryset = Establishment.objects.all()
     serializer_class = EstablishmentSerializer
-    pagination_class = PageNumberPagination
+    permission_classes = [permissions.IsAuthenticated, IsPartnerOrReadOnly]
 
     @swagger_auto_schema(
         method="get",
@@ -32,8 +34,11 @@ class EstablishmentModelViewSet(viewsets.ModelViewSet):
     )
     @action(detail=False, method=["get"])
     def list(self, request, *args, **kwargs):
-        serializer = self.serializer_class(self.queryset, many=True)
+        queryset = self.get_queryset()
+        serializer = self.serializer_class(queryset, many=True)
         return Response(serializer.data)
+
+
 
     @swagger_auto_schema(
         method="put",

@@ -6,13 +6,14 @@ from apps.establishment.models import Establishment
 class EstablishmentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Establishment
-        fields = (
-            'name',
-            'description',
-            'phone_number',
-            'avatar',
-            'partner'
-        )
+        fields = '__all__'
+        # fields = (
+        #     'name',
+        #     'description',
+        #     'phone_number',
+        #     'avatar',
+        #     'partner'
+        # )
 
 
 

@@ -1,19 +1,27 @@
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from rest_framework import viewsets, status
-from rest_framework.pagination import PageNumberPagination
+from rest_framework import viewsets, status, permissions
+from django_filters.rest_framework import DjangoFilterBackend
 
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
 
 from apps.beverage.models import Beverage
+from backend.api.utils.permissions import IsPartnerOrReadOnly
 from .serializers import BeverageSerializer
+from .filters import BeverageFilter
 
 
 class BeverageModelViewSet(viewsets.ModelViewSet):
     queryset = Beverage.objects.all()
     serializer_class = BeverageSerializer
-    pagination_class = PageNumberPagination
+    permission_classes = [permissions.IsAuthenticated, IsPartnerOrReadOnly]
+    # search_fields = ['name', 'establishment__name']
+    # ordering_fields = ['name', 'price']
+    filter_backends = [DjangoFilterBackend]
+    filterset_fields = ('availability_status',)
+    # filter_class = BeverageFilter  # Применение фильтра
+
 
     @swagger_auto_schema(
         method="get",
@@ -28,7 +36,7 @@ class BeverageModelViewSet(viewsets.ModelViewSet):
             404: openapi.Response(description="Not Found - Ресурс не найден"),
         },
     )
-    @action(detail=False, method=["get"])
+    @action(detail=True, method=["get"])
     def list(self, request, *args, **kwargs):
         serializer = self.serializer_class(self.queryset, many=True)
         return Response(serializer.data)
@@ -113,3 +121,23 @@ class BeverageModelViewSet(viewsets.ModelViewSet):
             return Response(status=status.HTTP_204_NO_CONTENT)
         except Beverage.DoesNotExist:
             return Response({"Сообщение": "Напиток не найден"}, status=status.HTTP_404_NOT_FOUND)
+
+
+
+
+
+
+
+'''
+
+http://127.0.0.1:3000/api/v1/beverage/create/
+
+{
+    "name": "Shoro",
+    "category": "no alcohol",
+    "price": 10.99,
+    "description": "shoro company",
+    "establishment": 1
+}
+
+'''

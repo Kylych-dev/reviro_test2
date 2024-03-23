@@ -130,6 +130,31 @@ class UserAuthenticationView(viewsets.ViewSet):
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 '''
 register partner
 
