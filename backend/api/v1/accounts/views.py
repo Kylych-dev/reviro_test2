@@ -1,10 +1,16 @@
 from rest_framework.decorators import action
-from rest_framework import viewsets, status, permissions
+from rest_framework import views, status, permissions
 from rest_framework.response import Response
 from rest_framework import generics, permissions
 from rest_framework.views import APIView
 
-from django.http import Http404
+
+from django.contrib.auth.tokens import default_token_generator
+from django.core.mail import send_mail
+from django.template.loader import render_to_string
+from django.utils.encoding import force_bytes
+from django.utils.http import urlsafe_base64_encode
+
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
 
@@ -19,8 +25,6 @@ from .serializers import (
     PartnerSerializer, 
     ChatMessageSerializer,
     )
-
-
 
 
 class RegularUserUpdateView(generics.UpdateAPIView):
@@ -68,8 +72,7 @@ class RegularUserUpdateView(generics.UpdateAPIView):
         serializer = self.get_serializer(instance, data=request.data, partial=partial)
         serializer.is_valid(raise_exception=True)
         serializer.save()
-
-        # Update user object if email is provided
+        
         if user_data.get('email'):
             custom_user = instance.user
             custom_user.email = user_data['email']
@@ -95,7 +98,6 @@ class PartnerUpdateView(generics.UpdateAPIView):
                     }, 
                     status=status.HTTP_404_NOT_FOUND
                     )
-    
 
     @swagger_auto_schema(
         operation_description="Обновление профиля партнера",
@@ -127,7 +129,6 @@ class PartnerUpdateView(generics.UpdateAPIView):
         serializer.is_valid(raise_exception=True)
         serializer.save()
 
-        # Update user object if email is provided
         if user_data.get('email'):
             custom_user = instance.user
             custom_user.email = user_data['email']
@@ -179,26 +180,28 @@ class ChatMessageCreateAPIView(APIView):
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
+class PasswordResetRequestView(views.APIView):
+    def post(self, request):
+        email = request.data.get('email')
+        if email:
+            user = CustomUser.objects.filter(email=email).first()
+            if user:
+                token = default_token_generator.make_token(user)
+                uid = urlsafe_base64_encode(force_bytes(user.pk))
+                reset_link = f"https://yourwebsite.com/reset-password/{uid}/{token}/"
+                subject = 'Password Reset'
+                message = render_to_string('email/password_reset_email.html', {
+                    'reset_link': reset_link,
+                })
+                send_mail(subject, message, 'tteest624@gmail.com', [email])
+                return Response({'detail': 'Password reset link has been sent'}, status=status.HTTP_200_OK)
+        return Response({'detail': 'User with this email does not exist'}, status=status.HTTP_400_BAD_REQUEST)
 
 
         
     
     
-'''    
-
-Теперь, когда вы отправляете запрос на обновление с данными, например:
-
-{
-    "user": {
-        "email": "new_email@example.com"
-    },
-    "name": "user",
-    "date_of_birth": "2000-01-01",
-    "subscription": true
-}
-
-
-
+'''   
 update 
 
     {
@@ -281,104 +284,4 @@ create establishment
     "partner": 2
 }
 
-    
-вот мой код 
-
-модель 
-
-class CustomUser(AbstractBaseUser, PermissionsMixin):
-    ROLE_CHOICES = (
-        ('administrator', 'Administrator'),
-        ('partner', 'Partner'),
-        ('regularuser', 'RegularUser'),)
-    email = models.EmailField(unique=True, max_length=60, verbose_name="Email")
-    avatar = models.ImageField(upload_to='avatars', blank=True, verbose_name="Avatar")
-    role = models.CharField(max_length=15, choices=ROLE_CHOICES)
-    is_active = models.BooleanField(_('active'), default=True)
-    is_staff = models.BooleanField(default=False)
-    is_admin = models.BooleanField(default=False)
-    is_superuser = models.BooleanField(default=False)
-    objects = CustomUserManager()
-    USERNAME_FIELD = 'email'
-    REQUIRED_FIELDS = []
-class RegularUser(models.Model):
-    user = models.OneToOneField(CustomUser, on_delete=models.CASCADE, primary_key=True)
-    name = models.CharField(max_length=100, verbose_name="Name")
-    date_of_birth = models.DateField(verbose_name="Date of Birth")
-    subscription = models.BooleanField(default=False, verbose_name="Subscription")
-class Partner(models.Model):
-    user = models.OneToOneField(CustomUser, on_delete=models.CASCADE, primary_key=True)
-    establishment_name = models.CharField(max_length=100, verbose_name="Establishment Name")
-    location = models.CharField(max_length=100, verbose_name="Location")
-    description = models.TextField(verbose_name="Description")
-    phone_number = models.CharField(max_length=15, verbose_name="Phone Number")
-
-
-модель заведения
-
-from django.db import models
-from ..accounts.models import Partner
-
-class Establishment(models.Model):
-    name = models.CharField(max_length=100, verbose_name="Name")
-    location = models.CharField(max_length=100, verbose_name="Location")
-    description = models.TextField(verbose_name="Description")
-    phone_number = models.CharField(max_length=15, verbose_name="Phone Number")
-    avatar = models.ImageField(upload_to='avatars', blank=True, verbose_name="Avatar")
-    partner = models.ForeignKey(Partner, on_delete=models.CASCADE, verbose_name="Partner", related_name='establishments')
-
-    class Meta:
-        verbose_name = "Establishment"
-        verbose_name_plural = "Establishments"
-
-    def __str__(self):
-        return self.name
-
-вот представление 
-class EstablishmentModelViewSet(viewsets.ModelViewSet):
-    queryset = Establishment.objects.all()
-    serializer_class = EstablishmentSerializer
-    pagination_class = PageNumberPagination
-    permission_classes = [permissions.IsAuthenticated]
-
-    @action(detail=False, method=["get"])
-    def list(self, request, *args, **kwargs):
-        serializer = self.serializer_class(self.queryset, many=True)
-        return Response(serializer.data)
-
-вот сериализатор
-from rest_framework import serializers
-from apps.establishment.models import Establishment
-
-
-
-class EstablishmentSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Establishment
-        fields = (
-            'name',
-            'description',
-            'phone_number',
-            'avatar',
-            'partner'
-        )
-
-
-        
-path("establishment/", EstablishmentModelViewSet.as_view({"get": "list"}), name="establishment-list"),
-показывает пустой лист хотя есть заведения 
-
-{
-    "user_id": 2,
-    "user": {
-        "id": 2,
-        "email": "partner_dordoi@mail.ru",
-        "role": "partner"
-    },
-    "establishment_name": "dordoi market",
-    "location": "bishkek",
-    "description": "bazar",
-    "phone_number": "12345"
-}
-    
-    '''
+'''

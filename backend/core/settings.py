@@ -53,7 +53,7 @@ ROOT_URLCONF = 'core.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [BASE_DIR, 'templates/',],
+        'DIRS': [BASE_DIR, 'api/v1/accounts/templates',],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -143,10 +143,9 @@ SIMPLE_JWT = {
 
 # Email Backend Configuration
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'  # Replace with preferred backend
-
+EMAIL_HOST = 'smtp.example.com' 
 EMAIL_PORT = 587  # Replace with email port
 EMAIL_USE_TLS = True  # Set to False if email server doesn't use TLS
-EMAIL_HOST = ''  # Replace with email host for gmail -> 'smtp.gmail.com'
 EMAIL_HOST_USER = ''  # Replace with email username
 EMAIL_HOST_PASSWORD = ''  # Replace with email password
 

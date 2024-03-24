@@ -29,8 +29,6 @@ class BeverageModelViewSet(viewsets.ModelViewSet):
     establishment
     '''
 
-
-
     @swagger_auto_schema(
         # method="get",
         operation_description="Получить список напитков",
@@ -48,12 +46,6 @@ class BeverageModelViewSet(viewsets.ModelViewSet):
         queryset = self.filter_queryset(self.get_queryset())  # Применяем фильтры, если они заданы
         serializer = self.serializer_class(queryset, many=True)
         return Response(serializer.data)
-
-
-    # @action(detail=True, method=["get"])
-    # def list(self, request, *args, **kwargs):
-    #     serializer = self.serializer_class(self.queryset, many=True)
-    #     return Response(serializer.data)
 
     @swagger_auto_schema(
         method="put",

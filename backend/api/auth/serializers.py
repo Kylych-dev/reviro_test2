@@ -1,4 +1,3 @@
-from django.contrib.auth.password_validation import validate_password
 from rest_framework import serializers
 from apps.accounts.models import (
     CustomUser, 
@@ -48,27 +47,3 @@ class RegularUserSerializer(serializers.ModelSerializer):
         user = CustomUser.objects.create_user(role=role, **user_data)
         student = RegularUser.objects.create(user=user, **validated_data)
         return student
-
-
-
-
-class ChangePasswordSerializer(serializers.Serializer):
-    old_password = serializers.CharField(required=True)
-    new_password = serializers.CharField(required=True)
-
-class ResetPasswordEmailSerializer(serializers.Serializer):
-    email = serializers.EmailField(required=True)
-
-
-
-
-
-
-
-
-'''
-
-update 
-
-
-'''
