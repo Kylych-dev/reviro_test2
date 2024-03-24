@@ -8,13 +8,14 @@ from api.v1.qr_code.views import QRCodeModelViewSet
 from api.v1.accounts.views import (
     RegularUserUpdateView, 
     PartnerUpdateView, 
-    ChatMessageCreateAPIView
+    ChatMessageCreateAPIView,
     )
 from api.auth.views import (
     PartnerRegistrationView, 
     RegularUserRegistrationView, 
     UserAuthenticationView, 
     UserRegistrationView,
+    ChangePasswordAPIView,
     )
 
 router = DefaultRouter(trailing_slash=False)
@@ -30,7 +31,7 @@ urlpatterns.extend(
 
         path('login/', UserAuthenticationView.as_view({"post": "login"}), name='user-login'),
         path('logout/', UserAuthenticationView.as_view({"post": "logout"}), name='user-logout'),
-
+        path('change_password/', ChangePasswordAPIView.as_view(), name='change_password'),
         # user
         path("users_update/<int:pk>/", RegularUserUpdateView.as_view(), name="update-detail"),
         path("partner_update/<int:pk>/", PartnerUpdateView.as_view(), name="update-detail"),

@@ -6,7 +6,20 @@ from rest_framework.views import APIView
 from rest_framework import status, viewsets
 from rest_framework import permissions
 from rest_framework.response import Response
+from django.contrib.auth import update_session_auth_hash
 from datetime import datetime
+
+
+from django.contrib.auth.tokens import default_token_generator
+from django.core.exceptions import ObjectDoesNotExist
+from django.utils.encoding import force_str
+from django.utils.http import urlsafe_base64_encode
+from django_rest_passwordreset.models import ResetPasswordToken
+
+
+from drf_yasg.utils import swagger_auto_schema
+from drf_yasg import openapi
+
 from apps.accounts.models import (
     CustomUser, 
     Partner, 
@@ -16,12 +29,26 @@ from apps.accounts.models import (
 from .serializers import (
     CustomUserSerializer, 
     PartnerSerializer, 
-    RegularUserSerializer
+    RegularUserSerializer,
+    ChangePasswordSerializer,
+    ResetPasswordEmailSerializer
     )
 
 
 class UserRegistrationView(APIView):
     permission_classes = [AllowAny]
+
+    @swagger_auto_schema(
+        operation_description="Регистрация пользователя.",
+        operation_summary="Регистрация пользователя",
+        operation_id="register_user",
+        tags=["Authentication"],
+        responses={
+            200: openapi.Response(description="OK - Пользователь зарегистрирован."),
+            201: openapi.Response(description="Created - Пользователь успешно создан."),
+            400: openapi.Response(description="Bad Request - Неверный запрос."),
+        },
+    )
     def post(self, request):
         serializer = CustomUserSerializer(data=request.data)
         if serializer.is_valid():
@@ -38,6 +65,17 @@ class UserRegistrationView(APIView):
 
 class RegularUserRegistrationView(APIView):
     permission_classes = [AllowAny]
+
+    @swagger_auto_schema(
+        operation_description="Регистрация пользователя.",
+        operation_summary="Регистрация пользователя",
+        operation_id="register_regular_user",
+        tags=["Authentication"],
+        responses={
+            201: openapi.Response(description="Created - пользователь успешно создан."),
+            400: openapi.Response(description="Bad Request - Неверный запрос."),
+        },
+    )
     def post(self, request):
         serializer = RegularUserSerializer(data=request.data)
         if serializer.is_valid():
@@ -54,6 +92,17 @@ class RegularUserRegistrationView(APIView):
 
 class PartnerRegistrationView(APIView):
     permission_classes = [AllowAny]
+
+    @swagger_auto_schema(
+        operation_description="Регистрация партнера.",
+        operation_summary="Регистрация партнера",
+        operation_id="register_partner",
+        tags=["Authentication"],
+        responses={
+            201: openapi.Response(description="Created - Партнер успешно создан."),
+            400: openapi.Response(description="Bad Request - Неверный запрос."),
+        },
+    )
     def post(self, request):
         serializer = PartnerSerializer(data=request.data)
         if serializer.is_valid():
@@ -70,6 +119,18 @@ class PartnerRegistrationView(APIView):
 
 class UserAuthenticationView(viewsets.ViewSet):
     permission_classes = (permissions.AllowAny,)
+
+    @swagger_auto_schema(
+        operation_description="Аутентификация пользователя.",
+        operation_summary="Вход пользователя",
+        operation_id="user_login",
+        tags=["Authentication"],
+        responses={
+            200: openapi.Response(description="OK - Пользователь успешно аутентифицирован."),
+            400: openapi.Response(description="Bad Request - Неверный запрос."),
+            401: openapi.Response(description="Unauthorized - Не авторизован."),
+        },
+    )
     def login(self, request):
         email = request.data.get('email')
         password = request.data.get('password')
@@ -110,7 +171,23 @@ class UserAuthenticationView(viewsets.ViewSet):
             },
             status=status.HTTP_200_OK,
         )
-
+    
+    @swagger_auto_schema(
+        operation_description="Выход пользователя.",
+        operation_summary="Выход пользователя",
+        operation_id="user_logout",
+        tags=["Authentication"],
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'refresh_token': openapi.Schema(type=openapi.TYPE_STRING),
+            },
+        ),
+        responses={
+            200: openapi.Response(description="OK - Пользователь успешно вышел из учетной записи."),
+            400: openapi.Response(description="Bad Request - Неверный запрос."),
+        },
+    )
     def logout(self, request):
         try:
             if "refresh_token" in request.data:
@@ -128,6 +205,71 @@ class UserAuthenticationView(viewsets.ViewSet):
 
 
 
+class ChangePasswordAPIView(APIView):
+    permission_classes = (permissions.AllowAny,)
+
+    @swagger_auto_schema(
+        operation_description="Изменить пароль",
+        operation_summary="Смена пароля пользователя",
+        operation_id="change_password",
+        tags=["Authentication"],
+        responses={
+            200: openapi.Response(description="OK - Пароль успешно изменен"),
+            400: openapi.Response(description="Bad Request - Неверный запрос"),
+        },
+    )
+    def post(self, request):
+        if request.method == 'POST':
+            serializer = ChangePasswordSerializer(data=request.data)
+            if serializer.is_valid():
+                user = request.user
+                if user.check_password(serializer.data.get('old_password')):
+                    user.set_password(serializer.data.get('new_password'))
+                    user.save()
+                    update_session_auth_hash(request, user)  # Обновляем сессию после изменения пароля
+                    return Response(
+                        {'message': 'Password changed successfully.'}, 
+                        status=status.HTTP_200_OK
+                        )
+                return Response(
+                    {'error': 'Incorrect old password.'}, 
+                    status=status.HTTP_400_BAD_REQUEST
+                    )
+            return Response(
+                serializer.errors, 
+                status=status.HTTP_400_BAD_REQUEST
+                )
+
+'''
+    def post(self, request):
+        serializer = ResetPasswordEmailSerializer(data=request.data)
+        if serializer.is_valid():
+            email = serializer.validated_data.get('email')
+            UserModel = CustomUser
+            try:
+                user = UserModel.objects.get(email=email)
+            except ObjectDoesNotExist:
+                return Response(
+                    {'error': 'Пользователь с таким email не найден.'}, 
+                    status=status.HTTP_404_NOT_FOUND
+                    )
+            
+            # Создание токена сброса пароля
+            token = default_token_generator.make_token(user)
+            uid = urlsafe_base64_encode(force_str(user.pk).encode())
+            ResetPasswordToken.objects.update_or_create(user=user, defaults={'key': token})
+            
+            # Отправка электронного письма с инструкциями по сбросу пароля
+            reset_password_url = f"{request.build_absolute_uri('/reset-password-confirm/')}?uid={uid}&token={token}"
+            # Здесь добавьте код для отправки электронного письма с reset_password_url
+            
+            return Response({'message': 'Email with reset password instructions has been sent.'}, status=status.HTTP_200_OK)
+        
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+'''
+    
+    
 
 
 

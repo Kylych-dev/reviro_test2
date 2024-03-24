@@ -8,7 +8,7 @@ from rest_framework.pagination import PageNumberPagination
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
 
-from backend.api.utils.permissions import IsPartnerOrReadOnly
+from api.utils.permissions import IsPartnerOrReadOnly
 from apps.establishment.models import Establishment
 from .serializers import EstablishmentSerializer
 

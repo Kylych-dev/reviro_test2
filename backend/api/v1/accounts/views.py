@@ -4,6 +4,9 @@ from rest_framework.response import Response
 from rest_framework import generics, permissions
 from rest_framework.views import APIView
 
+from django.http import Http404
+from drf_yasg.utils import swagger_auto_schema
+from drf_yasg import openapi
 
 from apps.accounts.models import (
     RegularUser, 
@@ -14,12 +17,9 @@ from apps.accounts.models import (
 from .serializers import (
     RegularUserSerializer, 
     PartnerSerializer, 
-    ChatMessageSerializer
+    ChatMessageSerializer,
     )
 
-from drf_yasg.utils import swagger_auto_schema
-from drf_yasg import openapi
-from django.http import Http404
 
 
 
@@ -33,16 +33,17 @@ class RegularUserUpdateView(generics.UpdateAPIView):
         try:
             return RegularUser.objects.get(pk=regular_user_id)
         except RegularUser.DoesNotExist:
-            return Response({'message': 'RegularUser not found'}, status=status.HTTP_404_NOT_FOUND)
-    
+            return Response(
+                {'message': 'RegularUser not found'}, 
+                status=status.HTTP_404_NOT_FOUND
+                )
     
 
     @swagger_auto_schema(
-        method="put",
         operation_description="Обновление профиля обычного пользователя",
         operation_summary="Обновление профиля обычного пользователя",
-        operation_id="update_regular_user_profile",
-        tags=["Обычный пользователь"],
+        operation_id="update_++++user_profile",
+        tags=["User"],
         responses={
             200: openapi.Response(description="OK - Профиль пользователя успешно обновлен"),
             201: openapi.Response(description="Created - Профиль пользователя успешно обновлен"),
@@ -81,7 +82,7 @@ class RegularUserUpdateView(generics.UpdateAPIView):
 class PartnerUpdateView(generics.UpdateAPIView):
     queryset = Partner.objects.all()
     serializer_class = PartnerSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [permissions.IsAuthenticated,]
 
     def get_object(self):
         partner_id = self.kwargs.get('pk')
@@ -96,13 +97,11 @@ class PartnerUpdateView(generics.UpdateAPIView):
                     )
     
 
-
     @swagger_auto_schema(
-        method="put",
         operation_description="Обновление профиля партнера",
         operation_summary="Обновление профиля партнера",
-        operation_id="update_partner_profile",
-        tags=["Партнер"],
+        operation_id="update_partner",
+        tags=["User-update"],
         responses={
             200: openapi.Response(description="OK - Профиль партнера успешно обновлен"),
             201: openapi.Response(description="Created - Профиль партнера успешно обновлен"),
@@ -136,13 +135,9 @@ class PartnerUpdateView(generics.UpdateAPIView):
 
         return Response(serializer.data)
     
-    
-
-
 
 class ChatMessageCreateAPIView(APIView):
     @swagger_auto_schema(
-        method="post",
         operation_description="Отправить сообщение",
         operation_summary="Создание нового сообщения",
         operation_id="send_message",
@@ -171,57 +166,22 @@ class ChatMessageCreateAPIView(APIView):
                     recipient=recipient,
                     text=text
                 )
-                return Response({'message': 'Сообщение успешно отправлено'}, status=status.HTTP_201_CREATED)
+                return Response(
+                    {'message': 'Сообщение успешно отправлено'}, 
+                    status=status.HTTP_201_CREATED
+                    )
             else:
-                return Response({'error': 'Получатель с указанным адресом электронной почты не найден'}, status=status.HTTP_400_BAD_REQUEST)
+                return Response(
+                    {'error': 'Получатель с указанным адресом электронной почты не найден'}, 
+                    status=status.HTTP_400_BAD_REQUEST
+                    )
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 
-    '''
-    @action(detail=False, methods=["post"])
-    def create(self, request, *args, **kwargs):
-        serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        serializer.save(sender=request.user)
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
 
-    def get_queryset(self):
-        user = self.request.user
-        return ChatMessage.objects.filter(recipient=user)'''
-
-
-
-
-
-
-
-# class ChatMessageViewSet(viewsets.ModelViewSet):
-#     queryset = ChatMessage.objects.all()
-#     serializer_class = ChatMessageSerializer
-#     permission_classes = [permissions.IsAuthenticated]
-
-#     def perform_create(self, serializer):
-#         serializer.save(sender=self.request.user)
-
-#     def get_queryset(self):
-#         queryset = super().get_queryset()
-#         user = self.request.user
-#         # Фильтрация сообщений для текущего пользователя (отправленных или полученных)
-#         queryset = queryset.filter(sender=user) | queryset.filter(recipient=user)
-#         return queryset
-
-
-
-
-
-
-
-
-
-
-    
+        
     
     
 '''    

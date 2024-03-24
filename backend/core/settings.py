@@ -4,6 +4,7 @@ from decouple import config
 import os
 
 
+
 SECRET_KEY = config('SECRET_KEY')
 DEBUG = config('DEBUG', default=False, cast=bool)
 
@@ -22,8 +23,9 @@ INSTALLED_APPS = [
     
     'rest_framework',
     'rest_framework_simplejwt.token_blacklist',
-    'drf_yasg',
     'django_filters',
+    'django_rest_passwordreset', 
+    'drf_yasg',
 
     # apps
     # 'apps.product',
@@ -51,7 +53,7 @@ ROOT_URLCONF = 'core.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [BASE_DIR, 'templates/',],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -136,3 +138,46 @@ SIMPLE_JWT = {
     'ROTATE_REFRESH_TOKENS': True,
     'BLACKLIST_AFTER_ROTATION': True
 }
+
+
+
+# Email Backend Configuration
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'  # Replace with preferred backend
+
+EMAIL_PORT = 587  # Replace with email port
+EMAIL_USE_TLS = True  # Set to False if email server doesn't use TLS
+EMAIL_HOST = 'smtp.gmail.com'  # Replace with email host for gmail -> 'smtp.gmail.com'
+EMAIL_HOST_USER = 'tteest624@gmail.com'  # Replace with email username
+EMAIL_HOST_PASSWORD = 'Bridgetvdeluxemother!'  # Replace with email password
+
+
+
+
+"""
+EMAIL_BACKEND='django.core.mail.backends.smtp.EmailBackend'  
+EMAIL_PORT= 587
+EMAIL_USE_TLS=True 
+EMAIL_HOST='smtp.gmail.com' 
+EMAIL_HOST_USER='tteest624@gmail.com'  
+EMAIL_HOST_PASSWORD='Bridgetvdeluxemother!' 
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.yandex.ru'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = 'mirbekov09@yandex.com'
+EMAIL_HOST_PASSWORD = 'Bridgetvdeluxemotherfucker!'
+
+
+
+email = EmailMessage(
+    subject='Тестовое письмо',
+    body='Привет, это тестовое письмо!', 
+    from_email='tteest624@gmail.com',
+    to=['mirbekov.kylych@mail.ru'], 
+)
+email.send()
+
+
+
+"""

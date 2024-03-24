@@ -10,7 +10,6 @@ from drf_yasg import openapi
 from apps.order.models import Order
 from .serializers import OrderSerializer
 
-from backend.api.utils.permissions import IsPartnerOrReadOnly
 
 class OrderModelViewSet(viewsets.ModelViewSet):
     queryset = Order.objects.all()
@@ -92,9 +91,15 @@ class OrderModelViewSet(viewsets.ModelViewSet):
             serializer = self.get_serializer(data=request.data)
             serializer.is_valid(raise_exception=True)
             serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
+            return Response(
+                serializer.data, 
+                status=status.HTTP_201_CREATED
+                )
         except Exception as ex:
-            return Response({"Сообщение": str(ex)}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {"Сообщение": str(ex)}, 
+                status=status.HTTP_400_BAD_REQUEST
+                )
 
 
     @swagger_auto_schema(
@@ -116,4 +121,7 @@ class OrderModelViewSet(viewsets.ModelViewSet):
             instance.delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
         except Order.DoesNotExist:
-            return Response({"Сообщение": "Заказ не найден"}, status=status.HTTP_404_NOT_FOUND)
+            return Response(
+                {"Сообщение": "Заказ не найден"}, 
+                status=status.HTTP_404_NOT_FOUND
+                )

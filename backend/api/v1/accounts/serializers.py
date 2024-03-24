@@ -80,9 +80,6 @@ class ChatMessageSerializer(serializers.ModelSerializer):
 
 
 
-
-
-
 '''
 class CustomUserSerializer(serializers.ModelSerializer):
     class Meta:

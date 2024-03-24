@@ -7,7 +7,7 @@ from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
 
 from apps.beverage.models import Beverage
-from backend.api.utils.permissions import IsPartnerOrReadOnly
+from api.utils.permissions import IsPartnerOrReadOnly
 from .serializers import BeverageSerializer
 from .filters import BeverageFilter
 
@@ -16,11 +16,8 @@ class BeverageModelViewSet(viewsets.ModelViewSet):
     queryset = Beverage.objects.all()
     serializer_class = BeverageSerializer
     permission_classes = [permissions.IsAuthenticated, IsPartnerOrReadOnly]
-    # search_fields = ['name', 'establishment__name']
-    # ordering_fields = ['name', 'price']
     filter_backends = [DjangoFilterBackend]
     filterset_fields = ('availability_status',)
-    # filter_class = BeverageFilter  # Применение фильтра
 
 
     @swagger_auto_schema(
