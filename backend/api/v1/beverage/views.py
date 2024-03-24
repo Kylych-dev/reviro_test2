@@ -1,6 +1,7 @@
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework import viewsets, status, permissions
+from rest_framework.filters import SearchFilter
 from django_filters.rest_framework import DjangoFilterBackend
 
 from drf_yasg.utils import swagger_auto_schema
@@ -9,19 +10,29 @@ from drf_yasg import openapi
 from apps.beverage.models import Beverage
 from api.utils.permissions import IsPartnerOrReadOnly
 from .serializers import BeverageSerializer
-from .filters import BeverageFilter
 
 
 class BeverageModelViewSet(viewsets.ModelViewSet):
     queryset = Beverage.objects.all()
     serializer_class = BeverageSerializer
     permission_classes = [permissions.IsAuthenticated, IsPartnerOrReadOnly]
-    filter_backends = [DjangoFilterBackend]
-    filterset_fields = ('availability_status',)
+    filter_backends = [DjangoFilterBackend, SearchFilter]
+    filterset_fields = ['availability_status']
+    search_fields = ['name']
+
+    '''
+    name
+    category
+    price
+    description
+    availability_status
+    establishment
+    '''
+
 
 
     @swagger_auto_schema(
-        method="get",
+        # method="get",
         operation_description="Получить список напитков",
         operation_summary="Получение списка напитков",
         operation_id="list_beverage",
@@ -33,10 +44,16 @@ class BeverageModelViewSet(viewsets.ModelViewSet):
             404: openapi.Response(description="Not Found - Ресурс не найден"),
         },
     )
-    @action(detail=True, method=["get"])
     def list(self, request, *args, **kwargs):
-        serializer = self.serializer_class(self.queryset, many=True)
+        queryset = self.filter_queryset(self.get_queryset())  # Применяем фильтры, если они заданы
+        serializer = self.serializer_class(queryset, many=True)
         return Response(serializer.data)
+
+
+    # @action(detail=True, method=["get"])
+    # def list(self, request, *args, **kwargs):
+    #     serializer = self.serializer_class(self.queryset, many=True)
+    #     return Response(serializer.data)
 
     @swagger_auto_schema(
         method="put",
