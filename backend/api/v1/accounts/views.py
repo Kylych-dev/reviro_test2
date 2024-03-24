@@ -61,18 +61,28 @@ class RegularUserUpdateView(generics.UpdateAPIView):
     def update(self, request, *args, **kwargs):
         partial = kwargs.pop('partial', False)
         instance = self.get_object()
+
+
+        # if instance.user.id != request.user.id:
+        if not isinstance(instance, RegularUser):
+            return Response(
+                {'message': 'RegularUser not found'}, 
+                status=status.HTTP_404_NOT_FOUND
+                )
+
         if instance.user.id != request.user.id:
             return Response(
                 {
                     'message': 'You are not allowed to update this profile.'
                     }, 
-                status=403
+                status=status.HTTP_403_FORBIDDEN
                 )
+        
         user_data = request.data.pop('user', {})  # Извлечение данных пользователя из запроса
         serializer = self.get_serializer(instance, data=request.data, partial=partial)
         serializer.is_valid(raise_exception=True)
         serializer.save()
-        
+
         if user_data.get('email'):
             custom_user = instance.user
             custom_user.email = user_data['email']
@@ -117,6 +127,13 @@ class PartnerUpdateView(generics.UpdateAPIView):
     def update(self, request, *args, **kwargs):
         partial = kwargs.pop('partial', False)
         instance = self.get_object()
+
+        if not isinstance(instance, Partner):
+            return Response(
+                {'message': 'RegularUser not found'}, 
+                status=status.HTTP_404_NOT_FOUND
+                )
+        
         if instance.user.id != request.user.id:
             return Response(
                 {
