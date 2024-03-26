@@ -13,7 +13,7 @@ class CustomUserManager(BaseUserManager):
             )
         user.set_password(password)
         if role == 'administrator':
-            user.is_superuser = True
+            user.is_superuser = False
             user.is_active = True
             user.is_admin = True
             user.is_staff = True

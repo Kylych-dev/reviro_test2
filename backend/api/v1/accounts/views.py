@@ -1,9 +1,7 @@
 from rest_framework.decorators import action
-from rest_framework import views, status, permissions
+from rest_framework import views, status, permissions, generics
 from rest_framework.response import Response
-from rest_framework import generics, permissions
 from rest_framework.views import APIView
-
 
 from django.contrib.auth.tokens import default_token_generator
 from django.core.mail import send_mail

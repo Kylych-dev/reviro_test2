@@ -2,22 +2,39 @@
 
 Here is a list of available endpoints for the API:
 
-| Endpoint             | Description                     |
-|----------------------|---------------------------------|
-| `admin/`      | Admin panel         |
-| `swagger/` | Swagger  Document API endpoints, including parameters, request bodies, and response schemas.|
-| `redoc/`       | Redoc  Document API endpoints, including parameters, request bodies, and response schemas.          |
-| `api/v1/product/`  | List all products  |
-| `api/v1/product/create/`       | Create a new product            |
-| `api/v1/product/update/<pk>/`  | Update an existing product (identified by its primary key)
-| `api/v1/product/delete/<pk>/`       | Delete an existing product (identified by its primary key)          |
-| `api/v1/establishment/`  | List all establishments  |
-| `api/v1/establishment/create/`       | List and create songs           |
-| `api/v1/establishment/update/<pk>/`  | Update an existing establishment (identified by its UUID) |
-| `api/v1/establishment/delete/<pk>/`       | Delete an existing establishment (identified by its UUID)          |
+| Endpoint                                | Description                         |
+|-----------------------------------------|-------------------------------------|
+| `api/v1/register/partner/`              | Регистрация партнера                |
+| `api/v1/register/admin/`                | Регистрация администратора          |
+| `api/v1/register/user/`                 | Регистрация обычного пользователя   |
+| `api/v1/login/`                         | Вход пользователя                   |
+| `api/v1/logout/`                        | Выход пользователя                  |
+| `api/v1/password-reset/`                | Запрос на сброс пароля              |
+| `api/v1/users_update/<pk>/`             | Обновление данных пользователя      |
+| `api/v1/partner_update/<pk>/`           | Обновление данных партнера          |
+| `api/v1/chat-msg/`                      | Создание сообщения чата             |
+| `api/v1/beverage/`                      | Получение списка всех напитков      |
+| `api/v1/beverage/create/`               | Создание нового напитка            |
+| `api/v1/beverage/update/<pk>/`          | Обновление информации о напитке    |
+| `api/v1/beverage/delete/<pk>/`          | Удаление напитка                   |
+| `api/v1/establishment/`                 | Получение списка всех заведений     |
+| `api/v1/establishment/create/`          | Создание нового заведения          |
+| `api/v1/establishment/update/<pk>/`     | Обновление информации о заведении  |
+| `api/v1/establishment/delete/<pk>/`     | Удаление заведения                 |
+| `api/v1/order/`                         | Получение списка всех заказов      |
+| `api/v1/order/create/`                  | Создание нового заказа             |
+| `api/v1/order/update/<pk>/`             | Обновление информации о заказе     |
+| `api/v1/order/delete/<pk>/`             | Удаление заказа                    |
+| `api/v1/qr_code/`                       | Получение списка всех QR-кодов     |
+| `api/v1/qr_code/create/`                | Создание нового QR-кода            |
+| `api/v1/qr_code/update/<pk>/`           | Обновление информации о QR-коде    |
+| `api/v1/qr_code/delete/<pk>/`           | Удаление QR-кода                   |
+|-----------------------------------------|-------------------------------------|
+
 
 <br>
 <br>
+
 
 
 For more detailed information, refer to the API documentation.

@@ -1,7 +1,6 @@
 from rest_framework_simplejwt.tokens import AccessToken, RefreshToken
 from rest_framework_simplejwt.exceptions import AuthenticationFailed, TokenError
 from rest_framework_simplejwt.settings import api_settings
-from rest_framework.permissions import AllowAny
 from rest_framework.views import APIView
 from rest_framework import status, viewsets, permissions
 from rest_framework.response import Response
@@ -30,7 +29,7 @@ from .serializers import (
 
 
 class UserRegistrationView(APIView):
-    permission_classes = [AllowAny]
+    permission_classes = [permissions.AllowAny]
 
     @swagger_auto_schema(
         operation_description="Регистрация пользователя.",
@@ -58,7 +57,7 @@ class UserRegistrationView(APIView):
 
 
 class RegularUserRegistrationView(APIView):
-    permission_classes = [AllowAny]
+    permission_classes = [permissions.AllowAny]
 
     @swagger_auto_schema(
         operation_description="Регистрация пользователя.",
@@ -85,7 +84,7 @@ class RegularUserRegistrationView(APIView):
 
 
 class PartnerRegistrationView(APIView):
-    permission_classes = [AllowAny]
+    permission_classes = [permissions.AllowAny]
 
     @swagger_auto_schema(
         operation_description="Регистрация партнера.",
