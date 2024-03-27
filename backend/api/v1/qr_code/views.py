@@ -5,7 +5,6 @@ from rest_framework import viewsets, status, permissions
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
 
-
 from api.v1.qr_code.serializers import QRCodeSerializer
 from apps.qr_code.models import QRCode
 
@@ -15,7 +14,6 @@ class QRCodeModelViewSet(viewsets.ModelViewSet):
     serializer_class = QRCodeSerializer
     permission_classes = [permissions.IsAdminUser,]
     
-
 
     @swagger_auto_schema(
         method="get",

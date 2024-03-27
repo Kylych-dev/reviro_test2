@@ -8,8 +8,10 @@ from api.v1.qr_code.views import QRCodeModelViewSet
 from api.v1.accounts.views import (
     RegularUserUpdateView, 
     PartnerUpdateView, 
-    ChatMessageCreateAPIView
+    ChatMessageCreateAPIView,
+    PasswordResetRequestView
     )
+
 from api.auth.views import (
     PartnerRegistrationView, 
     RegularUserRegistrationView, 
@@ -31,6 +33,8 @@ urlpatterns.extend(
         path('login/', UserAuthenticationView.as_view({"post": "login"}), name='user-login'),
         path('logout/', UserAuthenticationView.as_view({"post": "logout"}), name='user-logout'),
 
+        path('password-reset/', PasswordResetRequestView.as_view(), name='password_reset_request'),
+   
         # user
         path("users_update/<int:pk>/", RegularUserUpdateView.as_view(), name="update-detail"),
         path("partner_update/<int:pk>/", PartnerUpdateView.as_view(), name="update-detail"),
@@ -61,13 +65,5 @@ urlpatterns.extend(
         path("qr_code/create/", QRCodeModelViewSet.as_view({"post": "create"}), name="qr_code-create"),
         path("qr_code/update/<int:pk>/", QRCodeModelViewSet.as_view({"put": "update"}), name="qr_code-update"),
         path("qr_code/delete/<int:pk>/",QRCodeModelViewSet.as_view({"delete": "delete"}), name="qr_code-delete"),
-
-        
-    
-        # product
-        # path("product/", ProductModelViewSet.as_view({"get": "list"}), name="product-list"),
-        # path("product/create/", ProductModelViewSet.as_view({"post": "create"}), name="product-create"),
-        # path("product/update/<pk>/", ProductModelViewSet.as_view({"put": "update"}), name="product-update"),
-        # path("product/delete/<pk>/",ProductModelViewSet.as_view({"delete": "delete"}), name="product-delete"),     
     ]
 )

@@ -1,14 +1,11 @@
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework import viewsets, status, permissions
-from rest_framework.pagination import PageNumberPagination
-
-
 
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
 
-from backend.api.utils.permissions import IsPartnerOrReadOnly
+from api.utils.permissions import IsPartnerOrReadOnly
 from apps.establishment.models import Establishment
 from .serializers import EstablishmentSerializer
 
@@ -39,7 +36,6 @@ class EstablishmentModelViewSet(viewsets.ModelViewSet):
         return Response(serializer.data)
 
 
-
     @swagger_auto_schema(
         method="put",
         operation_description="Обновление данных учреждений",
@@ -48,9 +44,7 @@ class EstablishmentModelViewSet(viewsets.ModelViewSet):
         tags=["Establishment"],
         responses={
             200: openapi.Response(description="OK - Учреждение успешно обновлен"),
-            400: openapi.Response(
-                description="Bad Request - Неверный запрос или некорректные данные"
-            ),
+            400: openapi.Response(description="Bad Request - Неверный запрос или некорректные данные"),
             401: openapi.Response(description="Unauthorized - Неавторизованный запрос"),
             404: openapi.Response(description="Not Found - Ресурс не найден"),
         },
@@ -97,7 +91,10 @@ class EstablishmentModelViewSet(viewsets.ModelViewSet):
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         except Exception as ex:
-            return Response({"Сообщение": str(ex)}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {"Сообщение": str(ex)}, 
+                status=status.HTTP_400_BAD_REQUEST
+                )
 
 
     @swagger_auto_schema(
@@ -119,4 +116,7 @@ class EstablishmentModelViewSet(viewsets.ModelViewSet):
             instance.delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
         except Establishment.DoesNotExist:
-            return Response({"Сообщение": "Учреждение не найден"}, status=status.HTTP_404_NOT_FOUND)
+            return Response(
+                {"Сообщение": "Учреждение не найден"}, 
+                status=status.HTTP_404_NOT_FOUND
+                )
