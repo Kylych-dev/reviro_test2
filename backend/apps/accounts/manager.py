@@ -17,7 +17,8 @@ class CustomUserManager(BaseUserManager):
             user.is_active = True
             user.is_admin = True
             user.is_staff = True
-        if role: user.role = role
+        if role: 
+            user.role = role
         user.save(using=self._db)
         return user
 
